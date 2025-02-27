@@ -92,16 +92,14 @@ public class ProjectileController : MonoBehaviour
         this.toxicDamage = toxicDamage;
     }
 
-    private void ApplyInfernoPlague(EnemyController enemy)
-    {
-        Debug.Log("ApplyInfernoPlague called!");
-        Debug.Log($"Fire Damage: {fireDamage}, Toxic Damage: {toxicDamage}"); // Debugging
-        ElementalEffect effect = enemy.gameObject.AddComponent<ElementalEffect>();
-        effect.effectType = ElementalEffect.EffectType.InfernoPlague;
-        effect.duration = (fireDamage + toxicDamage) / 100f;
-        Debug.Log($"Effect duration: {effect.duration}");
-        effect.ApplyEffect(enemy, fireDamage, toxicDamage);
-    }
+   private void ApplyInfernoPlague(EnemyController enemy)
+{
+    Debug.Log("ApplyInfernoPlague called!");
+    Debug.Log($"Fire Damage: {fireDamage}, Toxic Damage: {toxicDamage}"); // Debugging
+    ElementalEffect effect = enemy.gameObject.AddComponent<ElementalEffect>();
+    effect.effectType = ElementalEffect.EffectType.InfernoPlague;
+    effect.ApplyEffect(enemy, fireDamage, toxicDamage);
+}
 
     void destroyProjectile()
     {
