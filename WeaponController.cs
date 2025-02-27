@@ -20,7 +20,7 @@ public class WeaponController : MonoBehaviour
     private float currentToxicDamage;
     private float currentCryoDamage;
     private float currentPlasmaDamage;
-    private float currentElementTriggerChance;
+    public float currentElementTriggerChance { get; private set; }
     private float currentCritChance;
     private float currentCritMultiplier;
     private float currentSpreadAngle;
@@ -171,18 +171,18 @@ public class WeaponController : MonoBehaviour
 
     public ActiveElementCombination GetActiveElementCombination()
     {
-        Debug.Log($"Weapon Element: {weaponStatsSO.weaponElementType}, Current Fire Damage: {currentFireDamage}, Current Toxic Damage: {currentToxicDamage}"); // Debugging
+        Debug.Log($"Weapon Element: {weaponStatsSO.weaponElementType}, Current Fire Damage: {currentFireDamage}, Current Toxic Damage: {currentToxicDamage}");
 
         if (weaponStatsSO.weaponElementType == WeaponStatsSO.WeaponElementType.Fire)
         {
             if (currentFireDamage > 0)
             {
-                if (currentToxicDamage <= 0) // Fire only
+                if (currentToxicDamage <= 0)
                 {
                     Debug.Log("Returning FireFire");
                     return ActiveElementCombination.FireFire;
                 }
-                else // Fire and Toxic
+                else
                 {
                     if (currentFireDamage >= currentToxicDamage)
                     {
@@ -196,7 +196,7 @@ public class WeaponController : MonoBehaviour
                     }
                 }
             }
-            else if (currentToxicDamage > 0) // Toxic only, with Fire Weapon
+            else if (currentToxicDamage > 0)
             {
                 Debug.Log("Returning FireToxic (Toxic only, Fire Weapon)");
                 return ActiveElementCombination.FireToxic;
@@ -207,9 +207,22 @@ public class WeaponController : MonoBehaviour
                 return ActiveElementCombination.None;
             }
         }
+        else if (weaponStatsSO.weaponElementType == WeaponStatsSO.WeaponElementType.Toxic) //Added Toxic Weapon logic
+        {
+            if (currentFireDamage > 0)
+            {
+                Debug.Log("Returning FireToxic (Fire stats, Toxic Weapon)");
+                return ActiveElementCombination.FireToxic;
+            }
+            else
+            {
+                Debug.Log("Returning None (Toxic weapon, no fire stats)");
+                return ActiveElementCombination.None;
+            }
+        }
         else
         {
-            Debug.Log("Returning None (Not Fire weapon)");
+            Debug.Log("Returning None (Not Fire or Toxic weapon)");
             return ActiveElementCombination.None;
         }
     }
@@ -276,11 +289,15 @@ public class WeaponController : MonoBehaviour
             currentCritChance += mod.critChanceBoostLevels[level];
             currentCritMultiplier += mod.critMultiplierBoostLevels[level];
 
-
             float reloadMultiplier = 1f - (mod.ReloadSpeedBoostLevels[level] / 100f);
             float oldReloadSpeed = currentReloadSpeed;
             currentReloadSpeed *= reloadMultiplier;
             currentReloadSpeed = Mathf.Max(currentReloadSpeed, 0.1f);
+
+            currentElementTriggerChance += mod.weaponElementalTriggerChanceBoostLevels[level]; // Add trigger chance
+            currentElementTriggerChance = Mathf.Clamp(currentElementTriggerChance, 0f, 1f); // Clamp
+            Debug.Log($"Basic Mod Applied: Element Trigger Chance: {currentElementTriggerChance}"); // Debugging
+
 
             Debug.Log($"[Reload Debug] Old Reload Speed: {oldReloadSpeed} sec | Modifier: {mod.ReloadSpeedBoostLevels[level]}% | New Reload Speed: {currentReloadSpeed} sec");
             Debug.Log($"Applying Basic Mod Effects: Damage Boost: {mod.baseDamageBoostLevels[level]}, New Base Damage: {currentBaseDamage}");
@@ -316,6 +333,7 @@ public class WeaponController : MonoBehaviour
         currentElectricDamage -= mod.electricDamageBoostLevels[level];
         currentPlasmaDamage -= mod.plasmaDamageBoostLevels[level];
         currentCryoDamage -= mod.cryoDamageBoostLevels[level];
+
     }
 
     public void RemoveBasicModEffects(ModSO mod, int level)
@@ -326,6 +344,10 @@ public class WeaponController : MonoBehaviour
         currentClipSize -= mod.clipSizeBoostLevels[level];
         currentCritChance += mod.critChanceBoostLevels[level];
         currentCritMultiplier += mod.critMultiplierBoostLevels[level];
+
+        currentElementTriggerChance -= mod.weaponElementalTriggerChanceBoostLevels[level]; // Remove trigger chance
+        currentElementTriggerChance = Mathf.Clamp(currentElementTriggerChance, 0f, 1f); // Clamp
+        Debug.Log($"Basic Mod Removed: Element Trigger Chance: {currentElementTriggerChance}"); // Debugging
 
     }
 

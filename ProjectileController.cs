@@ -34,32 +34,38 @@ public class ProjectileController : MonoBehaviour
             EnemyController enemyController = other.GetComponent<EnemyController>();
             enemyController.TakeDamage(damage);
 
-            // Get the active element combination from the WeaponController
             WeaponController weaponController = GetComponentInParent<WeaponController>();
             if (weaponController != null)
             {
-                Debug.Log("WeaponController found!"); // Debugging
-                WeaponController.ActiveElementCombination activeCombination = weaponController.GetActiveElementCombination();
+                float triggerChance = weaponController.currentElementTriggerChance;
 
-                Debug.Log($"Active Combination: {activeCombination}"); // Debugging
-
-                // Trigger the appropriate effect based on the combination
-                switch (activeCombination)
+                if (Random.value <= triggerChance)
                 {
-                    case WeaponController.ActiveElementCombination.FireFire:
-                        Debug.Log("Applying FireFire effect!");
-                        ApplyInfernoPlague(enemyController);
-                        break;
-                    case WeaponController.ActiveElementCombination.FireToxic:
-                        Debug.Log("Applying FireToxic effect!");
-                        ApplyInfernoPlague(enemyController);
-                        break;
-                    case WeaponController.ActiveElementCombination.None:
-                        Debug.Log("No elemental effect to apply.");
-                        break;
-                    default:
-                        Debug.Log("Unknown elemental combination.");
-                        break;
+                    WeaponController.ActiveElementCombination activeCombination = weaponController.GetActiveElementCombination();
+
+                    Debug.Log($"Active Combination: {activeCombination}, Triggered!");
+
+                    switch (activeCombination)
+                    {
+                        case WeaponController.ActiveElementCombination.FireFire:
+                            Debug.Log("Applying FireFire effect!");
+                            ApplyInfernoPlague(enemyController);
+                            break;
+                        case WeaponController.ActiveElementCombination.FireToxic:
+                            Debug.Log("Applying FireToxic effect!");
+                            ApplyInfernoPlague(enemyController);
+                            break;
+                        case WeaponController.ActiveElementCombination.None:
+                            Debug.Log("No elemental effect to apply.");
+                            break;
+                        default:
+                            Debug.Log("Unknown elemental combination.");
+                            break;
+                    }
+                }
+                else
+                {
+                    Debug.Log("Elemental effect trigger failed.");
                 }
             }
             else
